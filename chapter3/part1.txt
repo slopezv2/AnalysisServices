@@ -1,0 +1,14 @@
+Impersonation: 
+* Specific Windows User Name and Password: User who will be impersonated by SSAS account
+* Service Account: SSAS presents itself to the data source by using the same account that runs SSAS
+* Current User: is used only in DirectQuery mode and connects to the data source using the current user logged to analysis Services
+* https://docs.microsoft.com/en-us/archive/blogs/cathyk/importing-a-subset-of-data-using-partitions-step-by-step
+
+Best practices for reading data from SQL:
+* Use Views for each table, be carefull with names.
+* Use hints as NOLOCK to improve performance
+
+Access sources recommendations:
+* Server access to the network location of Access file.
+* Privileges to access the file.
+* ACE driver, check the bit version of Office and the ACE driver.
