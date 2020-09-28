@@ -12,3 +12,9 @@ Access sources recommendations:
 * Server access to the network location of Access file.
 * Privileges to access the file.
 * ACE driver, check the bit version of Office and the ACE driver.
+
+Reading from CSV files: 
+* for complex cases use schema.ini files to define data structures: https://docs.microsoft.com/en-us/sql/odbc/microsoft/schema-ini-file-text-file-driver?redirectedfrom=MSDN&view=sql-server-ver15
+OData:
+* you can use a svc file to connect
+* Not recommended because of the time unpredictability
