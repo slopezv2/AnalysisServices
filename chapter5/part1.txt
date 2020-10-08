@@ -1,0 +1,42 @@
+# Snowflake strategy to denormalize a table:
+ Use RELATED in the relational table to create new columns and create a hierarchy in the
+ new column
+
+ Product[Subcategory] = RELATED ('Product Subcategory'[Subcategory])
+ Product[Category] = RELATED ( 'Product Category'[Category])
+
+ Excel 2016 and under: perfomance issue related to unnatural hierarchies: https://www.sqlbi.com/articles/natural-hierarchies-in-power-pivot-and-tabular/#
+
+ Basic parent-child hierarchies:
+ 1. Create a calculated column that contains the list of values for EmployeeKey from the top of the hierarchy
+ down to the current employee.
+ Employee[EmployeePath] = PATH ( Employee[EmployeeKey], Employee[ParentEmployeeKey] )
+ 
+ 2. you need to create more calculated columns to represent each level in your hierarchy
+ To do that, create the HierarchyDepth
+Employee[HierarchyDepth] = PATHLENGTH (Employee[EmployeePath])
+
+3. Build a measure to return the maximum depth
+[Max Depth] := MAX ( Employee[HierarchyDepth])
+
+4. to populate the new calculated columns, you require the key value for each level
+
+PATHITEM( Employee[EmployeePath], 1, INTEGER) // for level 1, key as INTEGER
+
+5. the complete step to find the employee name of the level:
+Employee[EmployeeLevel1] = 
+LOOKUPVALUE (
+    Employee[Name],
+    Employee[EmployeeKey],
+    PATHITEM ( Employee[EmployeePath], 1, INTEGER)
+)
+
+6. extra step to control filtered levels
+[Current Hierarchy Depth] :=
+ISFILTERED ( Employee[EmployeeLevel1])
+ + ISFILTERED ( Employee[EmployeeLevel2])
+ + ISFILTERED ( Employee[EmployeeLevel3])
+ + ISFILTERED ( Employee[EmployeeLevel4])
+
+[Demo Measure] :=
+IF ([Current Hierarchy Depth]  > [Max Depth], BLANK(), 1 )
