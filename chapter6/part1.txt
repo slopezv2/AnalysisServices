@@ -1,0 +1,79 @@
+Junk dimensions: Created by merging several attributes that do not belong to any
+other dimension, and that you don't want to keep as separate dimensions to
+avoid a dimensional explosion
+
+Current value for an attribute.
+Products[Current List Price] = 
+LOOKUPVALUE ( 
+    Products[List Price],
+    Products[Product Code], Products[Product Code],
+    Products[ScdStatus], "Current"
+)
+
+All the sales made in the past as if they were made at the current Price
+Products[Actualized Sales Amount] :=
+SUMX ( 
+    Sales,
+    Sales[Line Quantity] * RELATED ( Products[Current List Price] )
+)
+in case you don't have a column to identify the current column:
+Products[ Current List Price usinf ScdStartDate] =
+VAR LastDateofProduct =
+    CALCULATE (
+        MAX ( Products[ScdStartDate]),
+        ALLEXCEPT ( Products, Products[Product Code])
+    )
+RETURN
+    LOOKUPVALUE (
+        Products[List Price],
+        Products[ScdStartDate], LastDateofProduct,
+        Products[Product Code], Products[Product Code]
+    )
+
+Snapshot fact tables:
+Related to aggregated data for previous time in a fact table, Dax can help
+with time-intelligence functions or you can aggregations to store specific
+aggregated data
+
+Generally, there is a performance penalty at query time by using the 
+dynamic calculation, but it seems that this penalty might disappear on 
+large result sets. We have observer better performance in dynamic 
+calculation with a large result set, which could be the case of a 
+chart displaying the stock level over time for different products. 
+You should carefully test the performance and the space saving of 
+dynamic calculation with your data before choosing to implement it in 
+production.
+
+Load data from views: Loading data from views is the best practice for
+creating  a model in Analysis Services and reduce maintenance cost
+
+Global recommendations:
+1. Create a schema for a data model: it works as documentation too
+2. Create one view for each table you want to create in a tabular model
+    - the view must belong to the schema that corresponds to the tabular project
+    - the view should include only the columns that are useful and will be
+    used in the tabular model.
+    - The names of columns and tables should be identical to the exposed ones
+    in tabular model and user friendly.
+    - Remove prefix and sufix from visible fields, keep them for hidden fields
+    - Use spaces to separate multiple words for visible columns, but do not use spaces
+    in hidden columns names.
+3. Import the views in the Tabular mode and remove the schema name
+4. Split date and time in different columns
+
+when you have no rows in the workspace database for the involved tables, or if the data
+would be compatible with one-to-one relationship, then the cardinality drop down
+list box will show all the possible options
+
+Broken referential integrity: some values in the many side cannot be mapped to the
+one side, must be sold because it can lead to confusion during Measures and calculations
+
+Emulate a relationship when a column is not a good candidate for key
+Sales [Sales Amount] :=
+CALCULATE (
+    SUMX ( Sales, Sales[Quantity] * Sales[Net Price] )
+    INTERSECT (
+        ALL ( Sales [ProductKey]),
+        VALUES ( 'Product'[ProductKey])
+    )
+)
