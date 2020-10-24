@@ -1,0 +1,94 @@
+TMSL commands:
+* Object operations: Alter, Create, CreateOrReplace, Delete
+* Data refresh operations: MergePartitions, Refresh
+* Scripting: Sequence
+* Database Management: Attach, Detach, Backup, Restore, Synchronize
+
+How to run:
+* XMLA window in SSMS
+* Invoking the Execute method of the Microsoft.AnalysisServices.Tabular.Server class in the AMO library
+* Using invoke-as cmd cmdlet in PowerShell.
+* Using Analysis Services Execute DDL task in SQL Server Integration Services
+
+Object operations in TMSL:
+* Create a single Database
+{
+    "create": {
+        "database": {
+            "name": "SingleDatabase",
+            "compatabilityLeve": 1200,
+            "model": {
+                "description" : "This is a sample model",
+                "culture": "en-US",
+                "dataSources": [
+                    {
+                        "name": "SqlServer Demo ContosoDW",
+                        "connectionString": "...",
+                        "impersonationMode": "impersonateServiceAccount"
+                    }
+                ],
+                "tables": [
+                    {
+                        "name": "Currency",
+                        "columns": [...],
+                        "partitions": [...]
+                    }
+                ]
+            },
+            "id": "SemanticModel"
+        }
+    }
+}
+
+Add a partition to an existing database
+{
+    "createOrReplace": {
+        "object" : {
+            "database": "singleTableDatabase",
+            "table": "Currency",
+            "partition": "Currency - others"
+        },
+        "partition": {
+            "name": "Currencies no longer used",
+            "mode": "import",
+            "dataView": "full",
+            "source": {
+                "query": [...],
+                "dataSource": "sqlServer Demo ContosoDW"
+            }
+        }
+    }
+}
+Data refresh, single table:
+{
+    "refresh": {
+        "type": "automatic",
+        "objects": [
+            {
+                "database": "singleTableDatabase",
+                "table": "Currency"
+            }
+        ]
+    }
+}
+You can create a list of commands sent to Analysis Services that are executed sequentially in a single
+transaction by using sequence commands.
+By Default, Analysis Services executes in parallel, the refresh of all the objects that are involved in the 
+request
+{
+    "sequence": {
+        "maxParallelism": 1,
+        "operations": [
+            {
+                "refresh": {
+                    "type": "automatic",
+                    "objects": [
+                        {
+                            "database": "Contoso"
+                        }
+                    ]
+                }
+            }
+        ]
+    }
+}

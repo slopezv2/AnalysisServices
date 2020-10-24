@@ -1,0 +1,18 @@
+Display Folder: Propery corresponds to the name of the folder that contains the column or measure. If
+you want to use  nested folders, separating names by backslash (\) 
+
+sort column:  Open the Column menu, choose sort, and select sort by Column.
+
+Perspectives: Mechanism to select a specific subset of tables and columns, it is not a security
+feature.
+
+Default field set: is a set of columns and mesures that is displayed automatically in a Power View
+canvas when a user double-clicks that table in the field list
+
+Table behaviour properties:
+* Row identifier: Enables you to specify a single column to act like the primary key of the table
+* keep Unique rows, based on Row identifier, it is not useful in Power Pivot
+* Default Label: This property sets the column that contains  the name or label that should be 
+used for each unique row in the table. Power BI ignores this property.
+* Default Image:  This property sets  the column that contains either binary data that contains
+an image or the text data that can be intepreted as the URL of an image. Power BI ignores this property
