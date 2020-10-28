@@ -1,0 +1,16 @@
+Maintenance tasks are required for partitioned tables when you have no run a full process
+You need to run Process Defrag
+
+Partitions:
+* Table menu -> Partitions
+
+Processing options:
+* Process Add: Partition. Add new rows to a partition, only the dictionaries 
+are incrementally updated in derived structures. All other derived structures are recalculated
+automatically. The tabular model can be queried during and after a Process Add operation. For
+use in scripts
+
+* Process Clear: drop all the data in the selected object (Database, Table, Partition). The affected
+objects are no longer query-able after this command.
+
+* Process Data: Table, Partition. 

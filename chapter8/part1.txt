@@ -16,3 +16,30 @@ Table behaviour properties:
 used for each unique row in the table. Power BI ignores this property.
 * Default Image:  This property sets  the column that contains either binary data that contains
 an image or the text data that can be intepreted as the URL of an image. Power BI ignores this property
+
+Key performance indicators:
+* Click the measure and select Create KPI in the toolbar
+* Right click on measure name and Create PKI.
+* target can be another measure but thresholds must be statically defined
+
+Translations:
+    Steps:
+* Create a translation file.
+* Write translated names in translation file.
+* Import a translation file
+* Test translations using a client tool
+
+Writing translated names in the file:
+* referenceCulture: Contains the objects that could be translated, this is where you can find the
+original names, descriptions, display folders and measures. This names should not be changed, it is
+only for reference
+
+* cultures: this contains a reference to the objects in the model. It also contains the following
+properties for the translations:
+    * translatedCaption: This is the name of the table, column or measure that is displayed to the
+    users.
+    * translatedDescription: This is the description of a table, column, or measure that can be 
+    displayed to users by certain  clients.
+    * translatedDisplayFolder: This is the translation of the folder name that is used to group
+    columns and measures
+    * Translator tool: https://www.sqlbi.com/tools/ssas-tabular-translator/
