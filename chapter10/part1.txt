@@ -1,0 +1,1 @@
+https://docs.microsoft.com/en-us/analysis-services/instances/authentication-methodologies-supported-by-analysis-services?redirectedfrom=MSDN&view=asallproducts-allversions&viewFallbackFrom=sql-server-ver15
