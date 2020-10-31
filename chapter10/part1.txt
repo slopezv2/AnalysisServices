@@ -1,1 +1,81 @@
 https://docs.microsoft.com/en-us/analysis-services/instances/authentication-methodologies-supported-by-analysis-services?redirectedfrom=MSDN&view=asallproducts-allversions&viewFallbackFrom=sql-server-ver15
+Granting databse roles and administrative permissions
+* None
+* Read: Permission to read data from the tables, they can query the model.
+* Process: Permission to process any object within the database, but not query it. Appropiate for SSIS.
+* Read and Process.
+* Administrator: Query, process, create, alter and delete any object. FOR DBAs.
+Equivalent using SSMS:
+* Full Control (administrator)
+* Process database
+* Read
+
+Check the connection string in Excel
+Data -> Connections -> Properties -> Connection String
+
+Filtering on multiple columns:
+= Product[Color] = "Black" && Product[ListPrice] > 3000
+= [Color] <> "Black"
+
+* To deny access to every row in the product table, you can use the folloing expression:
+= FALSE()
+
+One-to-Many Filtering
+= Producr[Brand] = "Contoso"
+
+On Sales or Many side
+
+= ( RELATED ('Date'[Calendar Year Number]) = 2007
+        && RELATED ('Product'[Color]) = "Black"
+  )
+||
+( RELATED ('Date'[Calendar Year Number]) = 2008
+        && RELATED ('Product'[Color]) = "Silver"
+)
+
+To retrieve the total of sales while also considering the products hidden by security roles, you can 
+create a Daily Sales Calculated table that stores the total of sales day by day as follows:
+
+Daily Sales = 
+ADDCOLUMNS (
+    ALLNONBLANKROW ( 'Date[DateKey]),
+    "Total Daily Sales", [Sales Amount]
+)
+
+Sales[% All Sales] :=
+DIVIDE ( [Sales Amount], SUM(Daily[Total Daily Sales]))
+https://www.sqlbi.com/articles/implement-non-visual-totals-with-power-bi-security-roles/
+
+Using a permission table:
+* A table with role and fields related to what they can see 
+your role-filter expression on Sales can use:
+= CONTAINS (
+    PermissionYearColor,
+    PermissionsYearColor [RoleName], "MyRole",
+    PermissionsYearColor[CalendarYear], RELATED ('Date'[Calendar Year Number]),
+    PermissionsYearColor [Color], RELATED('Product'[Color])
+)
+Hide the permissions table and set 
+= FALSE ()
+to avoid roles can query this table
+https://www.sqlbi.com/articles/security-cost-in-analysis-services-tabular/
+
+DAX functions for dynamic security:
+* USERNAME: This returns the Windows user name of the user
+* CUSTOMDATA: the string value that has been passed to the CustomData connection string property
+
+EVALUATE 
+ROW (
+    "Results from Username", USERNAME(),
+    "Results from CustomData", CUSTOMDATA()
+)
+
+Force role
+IF (
+    CUSTOMDATA () = "",
+    FALSE (),
+    Product[Brand] = CUSTOMDATA()
+)
+
+in connection:
+Roles=CustomDataRole; CustomData=Contoso
