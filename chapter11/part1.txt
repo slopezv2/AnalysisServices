@@ -14,3 +14,68 @@ use in scripts
 objects are no longer query-able after this command.
 
 * Process Data: Table, Partition. 
+
+Automatic Deployment
+* Building the model project using MSBuild
+* Updating the build outputs to change the deployment environments 
+* Generating a deployment script from the build outputs usinf SSAS Deployment Wizard
+* Executing the deployment scripts against  the SSAS 
+* Refreshing the cube to pull in data
+
+Source: https://notesfromthelifeboat.com/post/analysis-services-1-deployment/#:~:text=%20There%20are%20five%20main%20steps%20to%20a,deployment%20script%20against%20the%20SSAS%20instance%20More%20
+
+Building the model:
+msbuild TabularExample.smproj "/p:Configuration=validation" /t:Build /p:VisualStudioVersion=14.0
+there is a configuration build call validation
+
+ <TransactionalDeployment>true</TransactionalDeployment>
+      <PartitionDeployment>DeployPartitions</PartitionDeployment>
+      <RoleDeployment>RetainRoles</RoleDeployment>
+      <ProcessingOption>DoNotProcess</ProcessingOption>
+      <ImpactAnalysisFile></ImpactAnalysisFile>
+      <ConfigurationSettingsDeployment>Retain</ConfigurationSettingsDeployment>
+      <OptimizationSettingsDeployment>Deploy</OptimizationSettingsDeployment>
+      <WriteBackTableCreation>UseExisting</WriteBackTableCreation>
+
+Once we’ve generated the Model.deploymentoptions and Model.deploymenttargets files once, 
+we can create a deploymentoptions directory in our project, and check those files in. After our build step, 
+we can templatize the files in deploymentoptions using the PowerShell ExpandString command
+
+Note that we’re setting the RoleDeployment to RetainRoles, and ConfigurationSettingsDeployment to Retain. 
+This means that the users and groups, as well as the data source connection information will be 
+persistent across deployments. We also set ProcessingOption to DoNotProcess;
+
+Powershell script to overwrite the template:
+$deploymentDir = ".\deployment"
+mkdir -Force $deploymentDir
+cp "bin\$environment\*.*" $deploymentDir
+cp .\deploymentoptions\*.* $deploymentDir
+
+# Update deployment targets with parameters
+$template = Get-Content .\deploymentoptions\Model.deploymenttargets
+$expandedTemplate = $ExecutionContext.InvokeCommand.ExpandString($template)
+$expandedTemplate | Set-Content "$deploymentDir\Model.deploymenttargets"
+
+Generate the deployment script:
+Microsoft.AnalysisServices.Deployment.exe "$deploymentDir\Model.asdatabase" /s:"$deploymentDir\deploy.log" /o:"$deploymentDir\deploy.xmla" | Out-Default
+
+Run the deployment model:
+$SECURE_PASSWORD = ConvertTo-SecureString $analysisServicesPassword -AsPlainText -Force
+$CREDENTIAL = New-Object System.Management.Automation.PSCredential ($analysisServicesUsername, $SECURE_PASSWORD)
+Invoke-ASCmd –InputFile "$workspace\$deploymentDir\deploy.xmla" -Server $analysisServicesServer -Credential $CREDENTIAL
+
+Process all changes:
+Invoke-ProcessASDatabase -Server $analysisServicesServer -RefreshType Full -DatabaseName "$environment" -Credential $CREDENTIAL
+
+Backup and restore Azure Analysis Services: 
+https://azure.microsoft.com/es-es/blog/backup-and-restore-your-azure-analysis-services-models/#:~:text=%20Backup%20and%20restore%20your%20Azure%20Analysis%20Services,be%20in%20the%20storage%20account%20you%27ve...%20More%20
+
+Back up and restore SSAS
+https://www.mytechmantra.com/sql-server-analysis-services/how-to-backup-analysis-services-database-in-sql-server-using-sql-server-management-studio/
+
+https://www.mytechmantra.com/sql-server-analysis-services/how-to-automate-backup-of-analysis-services-database-using-sql-server-agent-job/
+
+Reasons for creating more partitions:
+* Reducing processing time
+* Easily removing data from a table
+* Consolidating data from different source tables 

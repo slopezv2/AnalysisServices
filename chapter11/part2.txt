@@ -1,0 +1,28 @@
+Available processing options
+* Process Add: Partitions. adds new rows to a partition. It should only be used in a programmatic way. You should specify the query returning only new rows that must be added to
+    to the partition, only the dictionaries are incrementally updated in derived structures. All the other derived structures are automatically recalculated. Model can be queried
+    during and after a Process Add. If you use Process Add directly in the SSMS user interface. it repeats the same query defined in the partition and adds all the resulting rows
+    to the existing ones.
+
+* Process Clear: Database, Table, Partition. Drops all the data in the selected object. The affected objuects are no longer query-able after this command.
+* Process Data: Table, Partition. Loads raw data in the selected object, also updating the columns dictionaries, whereas derided structures are not updated. Objects are not
+    Query-able after this command- You should execute Process Recall or Process Default to make the data query-able.
+
+* Process Default: Database, Table, Partition. Performs the necessary operations to make the marget object query-able. If the database, table or partition does not have data, 
+    it performs a Process Data first. If dependent structures are not valid, it applies  a partial Process Recalc to only those invalid derived structures.
+    A process Default operation completed at the database level is the only operation that guarantees that the table will be query-able after the operation.
+    A Process Default operation made at the partition level does a conditional Process Data, you must run either Process Default at database or table level or a Process 
+    Recalc  
+* Including all the operations in a single trancsation is also a best practice.
+
+* Process Defrag: NOT in UI for Database, Table. Rebuilds the column dictionaries without the need to access the data source to read the data again. It is exposed in the SSMS user interface for tables
+    only. This is useful only when you remove partitions from a table or you refresh some partitions. If you use Process Defrag at the database level, data for the unprocessed
+    tables tables is also loaded. This does not happen when it is run in a single table.
+
+* Process Full: Database, Table, partition. 
+
+You might want to separate process operations into different trancsations to save memory usage. During process operations, the tabular engine must keep in memory 2 versions of
+the objects that are part of the transactions.
+
+You can consider using Process Clear before Process full if you can afford out-of-service periods. Consider creating a database backup before Process Clear in case of any fail.
+
