@@ -1,0 +1,31 @@
+Data size: bytes for all the compressed data in segments and partitions. It does not include dictionary and attribute hierarchies.
+
+Columns Hierachies Size: number of bytes of automatically generated hierarchies for columns.
+
+User Hierarchies Size: number of bytes for user defined hierarchies.
+
+Relationship size: Number of bytes of relationships between tables-
+
+Columns total size: This is the number of bytes of all the structures related to a column (sum of Data Size, Dictionary Size ands Columns Hierarchies size)
+
+Dictionary Size: when 100 bytes or less it might be value encoding. bigger values are associated to hash encoding.
+
+https://www.sqlbi.com/articles/memory-settings-in-tabular-instances-of-analysis-services/
+
+Memory / HardMemoryLimit – 0
+Memory / LowMemoryLimit – 65
+Memory / TotalMemoryLimit – 80
+Memory / VertiPaqMemoryLimit – 60
+Memory / VertiPaqPagingPolicy – 0
+
+If you want to reduce memory for an instance of Analysis Services, it makes sense to set VertiPaqMemoryLimit to a number that is lower than LowMemoryLimit.
+
+HardMemoryLimit is the maximum memory the system can ever have. If SSAS exceed the hard memory limit, the system will aggressively 
+kill active sessions in order to reduce memory usage
+
+TotalMemoryLimit is the high memory limit – it is used to calculate the memory price for normal cache eviction and memory cleaning. 
+If it exceeds the total memory limit, the memory manager will evict all cached data which is not currently in use. TotalMemoryLimit must always be less than HardMemoryLimit.
+
+LowMemoryLimit is the point where the system will begin cleaning memory out of caches. As memory usage increases above the low memory limit, 
+SSAS get more aggressive about evicting cached data until it hits the high/total memory limit, at which point it evicts everything that isn’t pinned.
+

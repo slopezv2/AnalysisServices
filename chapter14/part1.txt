@@ -1,0 +1,15 @@
+Process name for SSAS: MSMDSRV.EXE
+
+Possible optimization: remove the paging file from OS, only if there are no additional services
+
+Memory settings are configured in the msmdsrv.ini file 
+
+Service counters are in kb, use a scale of 0.00001
+
+Order for limits:
+
+1. LowMemoryLimit: the cleaner starts to clean some memory by using a graceful tactic.
+2. TotalMemoryLimit has been surpassed: Cleaner is very aggresive. Cache is being cleared
+3. HardMemoryLimit is surpassed: most aggresive cleaner, the connection is closed. 
+
+https://www.sqlbi.com/tools/ssas-activity-monitor/
