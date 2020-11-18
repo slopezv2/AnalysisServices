@@ -1,0 +1,17 @@
+Running TMSL from powershell:
+Invoke-ASCmd -Server "localhost\yable" -InputGile "c:\scripts\process.json"
+
+Installing the latest version of SSMS gives the necessary cmlets to run using Powershell
+
+SQLAS: Accesing the AMO libraries
+SQLASCMDLETS: cmdlets for SSAS
+Examples:
+* Add-RoleMember
+* Backup-AsDatabase
+* Invoke-AsCmd // Executes a query in TMSL
+* Invoke-ProcessASDatabase: This processes a Database
+* Invoke-ProcessPartition: This processes a partition
+* Merge-Partition: merges a partition
+* Remove-RoleMember: Removes a member from a database role
+* Restore-ASDatabase: Restore a database on a server instance
+

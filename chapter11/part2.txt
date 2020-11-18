@@ -26,3 +26,54 @@ the objects that are part of the transactions.
 
 You can consider using Process Clear before Process full if you can afford out-of-service periods. Consider creating a database backup before Process Clear in case of any fail.
 
+Strategies:
+* Include several Process Full operations of partitions and tables in the same transaction: Model will always be query-able during processing. Requires more than the double the space
+    required to store processed objects.
+* Execute each Process Full operation in a separe transaction, longer execution time, query-able models during refresh, less memory required.
+
+* Include Process Data of selected partitions and tables  followed by a single Process Recalc operation of the database in the same transaction.
+
+* Execute Process Clear of partitions and tables to be processed in a first transaction and then Process Default of the Database in a second transaction. To optimize memory
+
+* Execute Process Data of partitions and tables to be processed in a separate transactions and then Process Recalc in the last transaction.
+
+* Execute Process Clear of partitions  and tables to be processed in a first transaction, then Process Data of partitions and tables in separate transactions and Process Recalc in
+the last transaction. Severe constrainst on memory.
+
+New Rows coming:
+* Execute one or more Process Add Operations in a single transaction.
+* Execute Process Add in the same transaction with Process Data commands on other partitions or tables, including a Process Recalc at the end
+
+https://www.sqlbi.com/articles/using-process-add-in-tabular-models/
+
+Process Add automation:
+TMSL:
+{
+    "refresh":{
+        "type":"add",
+        "objects":[
+            {
+                "database":"Contoso",
+                "table":"Sales",
+                "partition":"Sales"
+            }
+        ],
+        "overrides":[
+            {
+                "partitions":[
+                    {
+                        "originalObject":{
+                            "database":"Contoso3",
+                            "table":"Sales",
+                            "partition":"Sales"
+                        },
+                        "source":{
+                            "query":"SELECT * FROM [Analytics].[Sales] WHERE [Order Date] >= '20170211'"
+                        }
+                    }
+                ]
+            }
+        ]
+    }
+}
+

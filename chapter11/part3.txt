@@ -1,0 +1,88 @@
+TOM Sample:
+using System.Collections.Generic;
+using Microsoft.AnalysisServices.Tabular;
+using Microsoft.AnalysisServices.Tabular.DataRefresh;
+namespace ListTables {
+    class Program {
+ 
+        static void Main(string[] args) {
+            string serverName = @"gap\tabular";
+            string databaseName = "Contoso";
+ 
+            Server server = new Server();
+            server.Connect(serverName);
+            Database db = server.Databases[databaseName];
+            Table tableSales = db.Model.Tables["Sales"];
+            Partition partition = tableSales.Partitions[0];
+             
+            OverrideCollection oc = new OverrideCollection {
+                Partitions = {
+                    new PartitionOverride {
+                        OriginalObject = partition,
+                        Source = new QueryPartitionSourceOverride {
+                            DataSource = ((QueryPartitionSource)partition.Source).DataSource,
+                            Query = "SELECT * FROM [Analytics].[Sales] WHERE [Order Date] >= '20170211'"
+                        }
+                    }
+                }
+            };
+            var listOc = new List<OverrideCollection>();
+            listOc.Add(oc);
+            partition.RequestRefresh( RefreshType.Add, listOc );
+            db.Model.SaveChanges();
+        }
+    }
+}
+PowerShell:
+[System.Reflection.Assembly]::LoadWithPartialName("Microsoft.AnalysisServices.Tabular")
+ 
+$server = New-Object Microsoft.AnalysisServices.Tabular.Server
+$server.Connect("localhost\tabular")
+$db = $server.Databases["Contoso"]
+$model = $db.Model
+$tableSales = $model.Tables["Sales"]
+$partition = $tableSales.Partitions[0]
+$source = New-Object Microsoft.AnalysisServices.Tabular.DataRefresh.QueryPartitionSourceOverride
+$source.DataSource = $partition.Source.DataSource
+$source.Query = "SELECT * FROM [Analytics].[Sales] WHERE [Order Date] >= '20170211'"
+$po = New-Object Microsoft.AnalysisServices.Tabular.DataRefresh.PartitionOverride
+$po.OriginalObject = $partition
+$po.Source = $source
+$oc = New-Object Microsoft.AnalysisServices.Tabular.DataRefresh.OverrideCollection
+$oc.Partitions.Add($po)
+$listoc = New-Object "System.Collections.Generic.List[Microsoft.AnalysisServices.Tabular.DataRefresh.OverrideCollection]"
+$listoc.Add($oc)
+$partition.RequestRefresh("Add", $listoc )
+$model.SaveChanges();
+
+Process Data and Process Recalc:
+{
+    "sequence": {
+        "maxParallelism": 10,
+        "operations": [
+            {
+                "refresh": {
+                    "type": "dataOnly",
+                    "objects": [
+                        {
+                            "database": "Contoso",
+                            "table": "Sales"
+                        },
+                        {
+                            "database": "Contoso",
+                            "table": "Product"
+                        }
+                    ]
+                }
+            },
+            {
+                "refresh": {
+                    "type": "calculate",
+                    "objects: [
+                        "database: "Contoso"
+                    ]
+                }
+            }
+        ]
+    }
+}
