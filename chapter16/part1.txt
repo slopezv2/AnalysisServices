@@ -1,0 +1,30 @@
+Hardware most important points for deployment:
+1. CPU clock and model
+2. Memory speed
+3. Number of cores
+4. memory size
+
+Machine with huge RAM can be slower because of the architecture required to manage such huge RAM (NUMA)
+3 GHz or more for clock speed
+
+if your databases do not have large tables, you should give a higher priority to the clock speed
+
+You need at least 2 or 3 times the space required to store a compressed database in memory 
+Memory bandwidth is key 
+
+Analysis Services 2016 sp1 is NUMA-aware 
+
+NUMA settings:
+* ThreadPool\Query\GroupAffinity
+* Vertipaq\ThreadPool\GroupAffinity
+https://docs.microsoft.com/en-us/analysis-services/instances/high-availability-and-scalability-in-analysis-services?view=asallproducts-allversions#:~:text=Analysis%20Services%20utilizes%20the%20high,(WSFC)%2C%20or%20both.&text=Scalability%2C%20with%20or%20without%20availability,NLB%20over%20read%2Donly%20databases.
+
+Analysis Services utilizes the high availability and scalability mechanisms built into the Windows server platform: 
+* network load balancing (NLB), 
+* Window Server Failover Clustering (WSFC), or both.
+You cannot configure an Analysis Services instance to run in an Always On availability group
+Load balancing, coupled with multiple read-only databases, give you both scale and high availability 
+because all nodes are active, and when a server goes down, requests are automatically redistributed among the 
+remaining nodes. When you need both scalability and availability, an NLB cluster is the right choice.
+
+https://docs.microsoft.com/en-us/previous-versions/sql/sql-server-2008/ff795582(v=sql.100)?redirectedfrom=MSDN

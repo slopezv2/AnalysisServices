@@ -13,3 +13,34 @@ Order for limits:
 3. HardMemoryLimit is surpassed: most aggresive cleaner, the connection is closed. 
 
 https://www.sqlbi.com/tools/ssas-activity-monitor/
+
+Optimizations:
+1. Reduce column length and remove unnecesary data.
+2. avoid date/time in the same column.
+3. Order columns: you should try to put the least changing  columns first in the sort order
+
+Dictionary costs:
+1. with 1.000.000 numbers is approximately 20 to 30 MB
+2. the cost of a string to be 16 bytes plus string length. 
+
+Large tables: 1.000.000.000
+Medium size: 100.000.000 to 200.000.000
+
+for large tables - fact:
+* Avoid creating calculated columns 
+
+* Create aggregated tables:
+
+SalesBySubcategory =
+SUMMARIZECOLUMNS (
+    Sales[StoreKey],
+    Product[SubcategoryKey],
+    Sales[Order Date],
+    "Quantity", SUM(Sales[Quantity]),
+    "Line Amount", [Sales Amount Product],
+    "Line Cost", [Cost Product]
+)
+
+approaches for Near-Real time with partitions:
+* ProcessData for daily partition: Create one partition per day to reprocess
+* ProcessAdd for new transactions and rebuild with ProcessData at night
